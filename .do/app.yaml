@@ -22,6 +22,9 @@ services:
         value: http
       - key: AUTH_MODE
         value: gateway
+      - key: CONDUIT_S2S_SECRET
+        type: SECRET
+        scope: RUN_TIME
       - key: IRONSCALES_API_KEY
         type: SECRET
         scope: RUN_TIME
