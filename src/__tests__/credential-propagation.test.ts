@@ -13,8 +13,7 @@ import { runWithCredentials } from '../utils/client.js';
 async function callStatusWithCreds(apiKey: string, companyId: string): Promise<{
   connected: boolean;
   companyId: string | null;
-  domains: string[];
-  currentDomain: string | null;
+  tools: string[];
 }> {
   return runWithCredentials({ apiKey, companyId }, async () => {
     const server = createServer();

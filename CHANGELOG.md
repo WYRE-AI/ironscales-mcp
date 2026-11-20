@@ -8,8 +8,13 @@
   - The card is read-only by design: Ironscales remediation (quarantine et al.) is a deliberate, destructive action that stays with the model-driven remediation tools rather than a one-click card button.
   - The card payload builder is best-effort: a payload that isn't card-worthy degrades to the plain JSON result without affecting the tool call. 17 new contract tests in `src/__tests__/mcp-apps.test.ts` pin the `_meta` advertisement, the `ui://` resource wire shape, the neutral-default/brand-injection behavior, and the card normalization.
 
+### Changed
+
+- **BREAKING:** removed `ironscales_navigate` and `ironscales_back`. `tools/list` now returns every tool (`ironscales_status` plus the 6 domain tools) on a fresh session. Call domain tools directly; `ironscales_status` now reports the available tools instead of the current domain.
+
 ### Fixed
 
+- Domain tools were unreachable behind Conduit, which refuses to list or proxy `_navigate`: the 6 domain tools were never listed, and a domain tool called by name was refused before navigating (WYREAI-759). The per-session navigation state is gone with the gate.
 - `GET /health` (and new `/healthz` alias) now return a shallow, unauthenticated `200 {"status":"ok"}` with no credential or upstream checks. Previously `/health` ran through `getCredentials()` and returned `503` whenever credentials were absent. In gateway mode credentials are injected per-request via headers and are never present at startup, so the ACA liveness probe received `503` every 30s and continuously killed the container (crash loop). It also produced a recurring `[WARN] Missing Ironscales credentials` log.
 - CI `Test` job: added an ESLint v9 flat config (`eslint.config.js`) and the `typescript-eslint` devDependency. The repo declared a `lint` script and ESLint 9 but shipped no flat config, so the canonical reusable CI's non-skippable lint step failed (`ESLint couldn't find an eslint.config file`) on every run.
 
