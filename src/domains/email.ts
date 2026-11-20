@@ -1,6 +1,5 @@
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
-import type { DomainHandler, CallToolResult } from '../utils/types.js';
-import type { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
+import type { DomainHandler, CallToolResult, ToolCallExtra } from '../utils/types.js';
 import { getClient } from '../utils/client.js';
 import { logger } from '../utils/logger.js';
 
@@ -68,7 +67,7 @@ function getTools(): Tool[] {
 async function handleCall(
   toolName: string,
   args: Record<string, unknown>,
-  _extra?: RequestHandlerExtra
+  _extra?: ToolCallExtra
 ): Promise<CallToolResult> {
   const client = await getClient();
 

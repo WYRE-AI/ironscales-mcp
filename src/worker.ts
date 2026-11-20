@@ -7,6 +7,19 @@ interface Env {
   IRONSCALES_COMPANY_ID: string;
 }
 
+/**
+ * Module-worker fetch export.
+ *
+ * Cloudflare's `ExportedHandler` is declared by `@cloudflare/workers-types`,
+ * which is not part of this compilation. That package's `Request` and
+ * `Response` are different types from the Web Standard globals this file
+ * shares with the MCP SDK, so naming `ExportedHandler` here does not
+ * typecheck. This alias checks the fetch shape we actually export.
+ */
+interface WorkerFetchHandler<E> {
+  fetch(request: Request, env: E): Promise<Response>;
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -43,4 +56,4 @@ export default {
       }
     );
   },
-} satisfies ExportedHandler<Env>;
+} satisfies WorkerFetchHandler<Env>;
