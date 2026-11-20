@@ -1,43 +1,50 @@
-import type { DomainName, DomainHandler } from '../utils/types.js';
+import type { Tool } from '@modelcontextprotocol/sdk/types.js';
+import type { DomainHandler, CallToolResult } from '../utils/types.js';
+import { getCredentials } from '../utils/client.js';
+import { incidentsHandler } from './incidents.js';
+import { emailHandler } from './email.js';
+import { remediationHandler } from './remediation.js';
+import { statsHandler } from './stats.js';
+import { allowlistHandler } from './allowlist.js';
 
-const domainCache = new Map<DomainName, DomainHandler>();
+/**
+ * The tool list is flat: every tool is listed and callable immediately, with
+ * no navigate/back step. Conduit refuses to list or proxy navigation tools, so
+ * gating tools behind them leaves the domain tools unreachable.
+ */
 
-export async function getDomainHandler(domain: DomainName): Promise<DomainHandler> {
-  const cached = domainCache.get(domain);
-  if (cached) return cached;
+const statusHandler: DomainHandler = {
+  getTools: () => [
+    {
+      name: 'ironscales_status',
+      description: 'Check Ironscales API connection status and list the available tools.',
+      inputSchema: { type: 'object' as const, properties: {} },
+    },
+  ],
+  async handleCall(): Promise<CallToolResult> {
+    const creds = getCredentials();
+    const status = {
+      connected: !!creds,
+      companyId: creds?.companyId ?? null,
+      tools: getAllTools().map((t) => t.name),
+    };
+    return { content: [{ type: 'text', text: JSON.stringify(status, null, 2) }] };
+  },
+};
 
-  let handler: DomainHandler;
+const HANDLERS: DomainHandler[] = [
+  statusHandler,
+  incidentsHandler,
+  emailHandler,
+  remediationHandler,
+  statsHandler,
+  allowlistHandler,
+];
 
-  switch (domain) {
-    case 'incidents': {
-      const { incidentsHandler } = await import('./incidents.js');
-      handler = incidentsHandler;
-      break;
-    }
-    case 'email': {
-      const { emailHandler } = await import('./email.js');
-      handler = emailHandler;
-      break;
-    }
-    case 'remediation': {
-      const { remediationHandler } = await import('./remediation.js');
-      handler = remediationHandler;
-      break;
-    }
-    case 'stats': {
-      const { statsHandler } = await import('./stats.js');
-      handler = statsHandler;
-      break;
-    }
-    case 'allowlist': {
-      const { allowlistHandler } = await import('./allowlist.js');
-      handler = allowlistHandler;
-      break;
-    }
-    default:
-      throw new Error(`Unknown domain: ${domain}`);
-  }
+export function getAllTools(): Tool[] {
+  return HANDLERS.flatMap((handler) => handler.getTools());
+}
 
-  domainCache.set(domain, handler);
-  return handler;
+export function getHandlerForTool(toolName: string): DomainHandler | undefined {
+  return HANDLERS.find((handler) => handler.getTools().some((t) => t.name === toolName));
 }
