@@ -9,9 +9,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { http, HttpResponse } from 'msw';
-import type { Tool } from '@modelcontextprotocol/sdk/types.js';
-import { getNavigationTools, getBackTool, getAllDomains } from '../domains/navigation.js';
-import { getDomainHandler } from '../domains/index.js';
+import { getAllTools } from '../domains/index.js';
 import { incidentsHandler } from '../domains/incidents.js';
 import { listResources, readResource } from '../resources.js';
 import {
@@ -25,19 +23,10 @@ import { server } from './mocks/server.js';
 
 const RENDERABLE_TOOLS = ['ironscales_incidents_get'];
 
-async function getAllTools(): Promise<Tool[]> {
-  const tools: Tool[] = [...getNavigationTools(), getBackTool()];
-  for (const domain of getAllDomains()) {
-    const handler = await getDomainHandler(domain);
-    tools.push(...handler.getTools());
-  }
-  return tools;
-}
-
 describe('MCP Apps incident card', () => {
   describe('tool _meta advertisement', () => {
     it.each(RENDERABLE_TOOLS)('%s links the card via _meta', async (name) => {
-      const tool = (await getAllTools()).find((t) => t.name === name);
+      const tool = getAllTools().find((t) => t.name === name);
       expect(tool).toBeDefined();
       // Canonical flat key (ext-apps RESOURCE_URI_META_KEY) …
       expect(tool?._meta?.['ui/resourceUri']).toBe(INCIDENT_CARD_RESOURCE_URI);
@@ -48,7 +37,7 @@ describe('MCP Apps incident card', () => {
     });
 
     it('no other tools carry UI metadata', async () => {
-      const others = (await getAllTools()).filter(
+      const others = getAllTools().filter(
         (t) => t._meta && !RENDERABLE_TOOLS.includes(t.name)
       );
       expect(others).toEqual([]);

@@ -127,22 +127,32 @@ Local HTTP without a secret is development-only. It binds `127.0.0.1` and logs a
 MCP_TRANSPORT=http MCP_HTTP_HOST=127.0.0.1 MCP_ALLOW_INSECURE_DEV=1 npm run start:http
 ```
 
-## Available Domains
+## Available Tools
+
+Every tool is listed and callable immediately; there is no domain to enter first.
+The groupings below are documentation only.
+
+> **Upgrading?** `ironscales_navigate` and `ironscales_back` are removed. Call the
+> domain tools directly. `ironscales_status` still works and now lists the available tools.
+
+### Status
+- `ironscales_status` - Connection status and the available tools
 
 ### Allowlist
-Manage email allowlists and blocklists
+- `ironscales_allowlist_manage` - Manage email allowlists and blocklists
 
 ### Email
-Email investigation and classification
+- `ironscales_email_classify` - Email investigation and classification
 
 ### Incidents
-Phishing incident management and triage
+- `ironscales_incidents_list` - List phishing incidents
+- `ironscales_incidents_get` - Get a phishing incident
 
 ### Remediation
-Execute email remediations and quarantine
+- `ironscales_remediation_act` - Execute email remediations and quarantine
 
 ### Stats
-Security statistics and reporting
+- `ironscales_stats_company` - Security statistics and reporting
 
 
 ## Development
