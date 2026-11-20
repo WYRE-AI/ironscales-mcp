@@ -14,6 +14,11 @@
 
 ### Fixed
 
+- **The HTTP transport no longer exits on a malformed request (WYREAI-741).** The request
+  target was parsed against the client-supplied `Host` header, and a value that does not parse
+  (or a target such as `//`) threw inside the request listener before authentication. The
+  target is now parsed against a fixed base, so `Host` is no longer consulted, and a target
+  that still cannot be parsed gets a `400` JSON response while the server keeps running.
 - Domain tools were unreachable behind Conduit, which refuses to list or proxy `_navigate`: the 6 domain tools were never listed, and a domain tool called by name was refused before navigating (WYREAI-759). The per-session navigation state is gone with the gate.
 - `GET /health` (and new `/healthz` alias) now return a shallow, unauthenticated `200 {"status":"ok"}` with no credential or upstream checks. Previously `/health` ran through `getCredentials()` and returned `503` whenever credentials were absent. In gateway mode credentials are injected per-request via headers and are never present at startup, so the ACA liveness probe received `503` every 30s and continuously killed the container (crash loop). It also produced a recurring `[WARN] Missing Ironscales credentials` log.
 - CI `Test` job: added an ESLint v9 flat config (`eslint.config.js`) and the `typescript-eslint` devDependency. The repo declared a `lint` script and ESLint 9 but shipped no flat config, so the canonical reusable CI's non-skippable lint step failed (`ESLint couldn't find an eslint.config file`) on every run.
