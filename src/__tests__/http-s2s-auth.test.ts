@@ -179,6 +179,13 @@ afterEach(async () => {
 });
 
 describe('HTTP startup', () => {
+  it('rejects the startup promise when the port is already in use', async () => {
+    process.env.CONDUIT_S2S_SECRET = S2S_SECRET;
+    const first = await listen();
+    process.env.MCP_HTTP_PORT = String(first.port);
+    await expect(startHttpTransport()).rejects.toMatchObject({ code: 'EADDRINUSE' });
+  });
+
   it('refuses to start when CONDUIT_S2S_SECRET is empty', async () => {
     const logs = captureStderr();
     const exit = exitSpy();

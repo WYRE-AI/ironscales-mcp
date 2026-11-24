@@ -199,8 +199,13 @@ export async function startHttpTransport(): Promise<Server> {
     await handle();
   });
 
-  await new Promise<void>((resolve) => {
+  await new Promise<void>((resolve, reject) => {
+    // A bind failure (e.g. EADDRINUSE) rejects instead of surfacing as an
+    // uncaught 'error' event, so startHttpTransport().catch() can handle it.
+    const onError = (error: Error) => reject(error);
+    httpServer.once('error', onError);
     httpServer.listen(port, host, () => {
+      httpServer.off('error', onError);
       logger.info(`Ironscales MCP HTTP streaming server listening on ${host}:${port}`);
       resolve();
     });

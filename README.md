@@ -96,9 +96,11 @@ claude mcp add ironscales-mcp \
 The image listens on `0.0.0.0` inside the container (`MCP_HTTP_HOST`) and defaults to `AUTH_MODE=gateway`. Publish the port on loopback and pass a real S2S secret. In gateway mode, Ironscales credentials arrive on each request as headers; they are not read from the environment.
 
 ```bash
+# Placeholder values are rejected at startup; generate a real secret first.
+export CONDUIT_S2S_SECRET="$(openssl rand -hex 32)"
 docker build -t ironscales-mcp .
 docker run \
-  -e CONDUIT_S2S_SECRET=your-s2s-secret \
+  -e CONDUIT_S2S_SECRET \
   -p 127.0.0.1:8080:8080 \
   ironscales-mcp
 ```
@@ -106,14 +108,16 @@ docker run \
 Compose refuses to start when `CONDUIT_S2S_SECRET` is unset. The gateway service sets `AUTH_MODE=gateway`, does not inject `IRONSCALES_API_KEY` or `IRONSCALES_COMPANY_ID`, and publishes `127.0.0.1:8080:8080`:
 
 ```bash
-CONDUIT_S2S_SECRET=your-s2s-secret docker compose up
+export CONDUIT_S2S_SECRET="$(openssl rand -hex 32)"
+docker compose up
 ```
 
 Single-tenant HTTP (`AUTH_MODE=env`) still requires the S2S secret, then uses `IRONSCALES_API_KEY` and `IRONSCALES_COMPANY_ID`. It is separate from the gateway Compose service above.
 
 ```bash
+export CONDUIT_S2S_SECRET="$(openssl rand -hex 32)"
 docker run \
-  -e CONDUIT_S2S_SECRET=your-s2s-secret \
+  -e CONDUIT_S2S_SECRET \
   -e AUTH_MODE=env \
   -e IRONSCALES_API_KEY=your-value \
   -e IRONSCALES_COMPANY_ID=your-value \
