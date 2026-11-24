@@ -1,5 +1,20 @@
-import type { Tool } from '@modelcontextprotocol/sdk/types.js';
+import type {
+  Notification,
+  Request,
+  ServerNotification,
+  ServerRequest,
+  Tool,
+} from '@modelcontextprotocol/sdk/types.js';
 import type { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
+
+/**
+ * Extra argument passed by `Server.setRequestHandler` for the default
+ * `Server` type parameters.
+ */
+export type ToolCallExtra = RequestHandlerExtra<
+  ServerRequest | Request,
+  ServerNotification | Notification
+>;
 
 export type CallToolResult = {
   content: Array<{ type: 'text'; text: string }>;
@@ -11,6 +26,6 @@ export interface DomainHandler {
   handleCall(
     toolName: string,
     args: Record<string, unknown>,
-    extra?: RequestHandlerExtra
+    extra?: ToolCallExtra
   ): Promise<CallToolResult>;
 }

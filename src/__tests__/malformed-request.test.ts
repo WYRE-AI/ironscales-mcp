@@ -48,7 +48,9 @@ beforeAll(async () => {
   process.env.MCP_ALLOW_INSECURE_DEV = '1';
   delete process.env.CONDUIT_S2S_SECRET;
   delete process.env.AUTH_MODE;
-  await import('../http.js');
+  // http.ts only auto-starts outside vitest, so start the transport explicitly.
+  const { startHttpTransport } = await import('../http.js');
+  await startHttpTransport();
   expect(httpServers).toHaveLength(1); // guards the afterAll cleanup below
   await waitForServerReady();
 });
